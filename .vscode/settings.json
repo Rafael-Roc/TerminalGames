@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "Tetris.sln",
+    "git.ignoreLimitWarning": true
+}
