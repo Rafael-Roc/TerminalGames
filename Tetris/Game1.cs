@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Tetris.FrameWork;
 using Tetris.Scripts;
 
@@ -18,7 +19,7 @@ public class Tetris : Game
 
         InputManager.StartListening();
         InputManager.OnInputReceived += Input;
-        
+
 
         System.Console.WriteLine($"00:00 \n");
         DrawGrid(gameState.GameGrid);
@@ -35,11 +36,11 @@ public class Tetris : Game
 
         _elapsedTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        if (_elapsedTime >= 0.2f)
+        if (_elapsedTime >= 0.5f)
         {
             Timer(gameTime);
             gameState.MoveBlockDown();
-            
+
 
             _elapsedTime = 0;
         }
@@ -57,7 +58,7 @@ public class Tetris : Game
     {
         Console.SetCursorPosition(0, 2);
         for (int r = 0; r < grid.Rows; r++)
-        {   
+        {
             for (int c = 0; c < grid.Columns; c++)
             {
                 int id = grid[r, c];
@@ -82,10 +83,25 @@ public class Tetris : Game
         }
     }
 
+    public void InitializeBorders(GameGrid grid)
+    {
+        for (int r = 0; r < grid.Rows; r++)
+        {
+            for (int c = 0; c < grid.Columns; c++)
+            {
+                if (r < grid.BorderSize || r >= grid.Rows - grid.BorderSize || c < grid.BorderSize || c >= grid.Columns - grid.BorderSize)
+                {
+                    grid[r, c] = 1;
+                }
+            }
+        }
+    }
+
     private void Draw(GameState gameState)
     {
         DrawGrid(gameState.GameGrid);
         DrawBlock(gameState.CurrentBlock);
+        InitializeBorders(gameState.GameGrid);
     }
 
     private void Timer(GameTime pGameTime)
@@ -99,21 +115,26 @@ public class Tetris : Game
 
     private string GetBlockCharacter(int id)
     {
-        if (id == 0)
-            return " . ";
-        else
-            return "[-]";
+        switch (id)
+        {
+            case 0:
+                return " . ";
+            case 1:
+                return "[~]";
+            default:
+                return "[-]";
+        }
     }
 
     private ConsoleColor GetBlockColor(int id)
     {
-        ConsoleColor[] blockColor = { ConsoleColor.Gray, ConsoleColor.Cyan, ConsoleColor.DarkBlue, ConsoleColor.DarkYellow, ConsoleColor.Yellow, ConsoleColor.Green, ConsoleColor.Magenta, ConsoleColor.Red };
+        ConsoleColor[] blockColor = { ConsoleColor.Gray, ConsoleColor.Gray, ConsoleColor.Cyan, ConsoleColor.DarkBlue, ConsoleColor.DarkYellow, ConsoleColor.Yellow, ConsoleColor.Green, ConsoleColor.Magenta, ConsoleColor.Red };
         return blockColor[id];
     }
 
     private void Input(ConsoleKey key)
     {
-        switch(key)
+        switch (key)
         {
             case ConsoleKey.A:
                 gameState.MoveBlockLeft();
